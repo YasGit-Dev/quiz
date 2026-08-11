@@ -14,10 +14,12 @@ const resultMessage = document.getElementById("result-message");
 const restartButton = document.getElementById("restart-btn");
 const progressBar = document.getElementById("progress");
 
-// تعداد سوالاتی که هر بار از سرور می‌گیریم
-const QUESTION_COUNT = 5;
+// setup screen dropdowns
+const categorySelect = document.getElementById("category-select");
+const difficultySelect = document.getElementById("difficulty-select");
+const amountSelect = document.getElementById("amount-select");
 
-// این آرایه دیگه ثابت نیست، هر بار از API پر میشه
+// not hardcoded anymore, gets filled from the API
 let quizQuestions = [];
 
 // QUIZ STATE VARS
@@ -29,14 +31,14 @@ let answersDisabled = false;
 startButton.addEventListener("click", startQuiz);
 restartButton.addEventListener("click", restartQuiz);
 
-// رمزگشایی کاراکترهای HTML که API می‌فرسته (مثل &quot; &amp; و ...)
+// decode the weird HTML entities the API sends back (like &quot; &amp; etc)
 function decodeHTML(str) {
   const txt = document.createElement("textarea");
   txt.innerHTML = str;
   return txt.value;
 }
 
-// به‌هم‌ریختن یک آرایه (Fisher-Yates shuffle)
+// shuffle an array so answers aren't always in the same order (Fisher-Yates)
 function shuffleArray(array) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -46,15 +48,27 @@ function shuffleArray(array) {
   return arr;
 }
 
-// گرفتن سوالات تصادفی از Open Trivia Database
+// grab random questions from Open Trivia Database, using whatever the user picked
 async function fetchQuestions() {
-  const res = await fetch(
-    `https://opentdb.com/api.php?amount=${QUESTION_COUNT}&type=multiple&category=12
-    `
-  );
+  const amount = amountSelect.value;
+  const category = categorySelect.value;
+  const difficulty = difficultySelect.value;
+
+  let url = `https://opentdb.com/api.php?amount=${amount}&type=multiple`;
+
+  // only tack these on if the user didn't leave them on "Any"
+  if (category) url += `&category=${category}`;
+  if (difficulty) url += `&difficulty=${difficulty}`;
+
+  const res = await fetch(url);
   const data = await res.json();
 
-  // تبدیل فرمت API به همون فرمتی که کد قبلی انتظار داشت
+  // response_code 1 means the API doesn't have enough questions for this combo
+  if (data.response_code !== 0) {
+    throw new Error("Not enough questions for this combination, try different settings.");
+  }
+
+  // reshape the API response into the format the rest of the code expects
   return data.results.map((q) => {
     const answers = shuffleArray([
       { text: decodeHTML(q.correct_answer), correct: true },
