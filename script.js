@@ -14,10 +14,10 @@ const resultMessage = document.getElementById("result-message");
 const restartButton = document.getElementById("restart-btn");
 const progressBar = document.getElementById("progress");
 
-// setup screen dropdowns
-const categorySelect = document.getElementById("category-select");
-const difficultySelect = document.getElementById("difficulty-select");
-const amountSelect = document.getElementById("amount-select");
+// setup screen chip groups
+const categoryGroup = document.getElementById("category-group");
+const difficultyGroup = document.getElementById("difficulty-group");
+const amountGroup = document.getElementById("amount-group");
 
 // not hardcoded anymore, gets filled from the API
 let quizQuestions = [];
@@ -30,6 +30,27 @@ let answersDisabled = false;
 // event listeners
 startButton.addEventListener("click", startQuiz);
 restartButton.addEventListener("click", restartQuiz);
+
+// ===== CHIP SELECTOR LOGIC =====
+// each group (category / difficulty / amount) works the same way:
+// clicking a chip marks it selected, un-marks its siblings, and stores
+// the picked value on the group's own data-value attribute
+
+function setupChipGroup(group) {
+  group.querySelectorAll(".chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      group.querySelectorAll(".chip").forEach((c) => {
+        c.classList.remove("selected");
+      });
+      chip.classList.add("selected");
+      group.dataset.value = chip.dataset.value;
+    });
+  });
+}
+
+setupChipGroup(categoryGroup);
+setupChipGroup(difficultyGroup);
+setupChipGroup(amountGroup);
 
 // decode the weird HTML entities the API sends back (like &quot; &amp; etc)
 function decodeHTML(str) {
@@ -50,9 +71,9 @@ function shuffleArray(array) {
 
 // grab random questions from Open Trivia Database, using whatever the user picked
 async function fetchQuestions() {
-  const amount = amountSelect.value;
-  const category = categorySelect.value;
-  const difficulty = difficultySelect.value;
+  const amount = amountGroup.dataset.value;
+  const category = categoryGroup.dataset.value;
+  const difficulty = difficultyGroup.dataset.value;
 
   let url = `https://opentdb.com/api.php?amount=${amount}&type=multiple`;
 
