@@ -21,7 +21,7 @@
 
 /* Olive Relic */
 [data-theme="olive-relic"] {
-  --bg: #e6d7c4;
+  --bg: #eef1f6;
   --surface: #cfbb9a;
   --ink: #4b3d1a;
   --muted: #899064;
@@ -37,7 +37,7 @@
 
 /* Old Wine */
 [data-theme="old-wine"] {
-  --bg: #e7d2a7;
+  --bg: #eef1f6;
   --surface: #e7d2a7;
   --ink: #432e1d;
   --muted: #9e9268;
@@ -53,7 +53,7 @@
 
 /* Snowy Days */
 [data-theme="snowy-days"] {
-  --bg: #c1bab2;
+  --bg: #eef1f6;
   --surface: #c1bab2;
   --ink: #170f0c;
   --muted: #887d77;
@@ -69,7 +69,7 @@
 
 /* Moody Earth */
 [data-theme="moody-earth"] {
-  --bg: #c2c2a8;
+  --bg: #eef1f6;
   --surface: #c2c2a8;
   --ink: #0a1819;
   --muted: #778168;
@@ -85,7 +85,7 @@
 
 /* Future Home  */
 [data-theme="future-home"] {
-  --bg: #f0edda;
+  --bg: #eef1f6;
   --surface: #e4dfb9;
   --ink: #5f6048;
   --muted: #9f777d;
@@ -102,7 +102,7 @@
 
 /* Copper Tide  */
 [data-theme="copper-tide"] {
-  --bg: #e5d5b5;
+  --bg: #eef1f6;
   --surface: #c5b995;
   --ink: #344f52;
   --muted: #657f78;
@@ -118,7 +118,7 @@
 
 /* Velvet Dusk */
 [data-theme="velvet-dusk"] {
-  --bg: #dcbbc4;
+  --bg: #eef1f6;
   --surface: #dcbbc4;
   --ink: #171723;
   --muted: #d0a6b2;
