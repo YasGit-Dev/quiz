@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
@@ -15,47 +15,51 @@
   <body>
     <div class="page">
       <div class="container">
+        <!-- LANGUAGE SWITCHER -->
+        <div class="lang-switcher-row">
+          <button type="button" class="lang-switch" id="lang-switch" data-active="en" aria-label="Toggle language">
+            <span class="lang-switch-knob"></span>
+            <span class="lang-switch-text lang-switch-text-en">EN</span>
+            <span class="lang-switch-text lang-switch-text-fa">فا</span>
+          </button>
+        </div>
+
         <!-- START SCREEN -->
         <div class="screen active" id="start-screen">
-          <span class="eyebrow">Trivia Challenge</span>
+          <span class="eyebrow" data-i18n="eyebrowStart">Trivia Challenge</span>
           <h1 class="headline">
-            Quiz
-            <span class="highlight">
-              Time
-              <svg class="squiggle" viewBox="0 0 130 14" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M2,8 Q17,-1 32,8 T62,8 T92,8 T122,8" fill="none" stroke-width="4" stroke-linecap="round" />
-              </svg>
-            </span>
+            <span data-i18n="headlinePrefix">Quiz</span>
+            <span class="highlight" data-i18n="headlineHighlight">Time</span>
           </h1>
-          <p class="subtext">Pick your battleground, then see how much you really know.</p>
+          <p class="subtext" data-i18n="subtext">Pick your battleground, then see how much you really know.</p>
 
           <div class="field-group">
-            <span class="field-label">Category</span>
+            <span class="field-label" data-i18n="labelCategory">Category</span>
             <div class="chip-group" id="category-group" data-value="">
-              <button type="button" class="chip selected" data-value="">Any</button>
-              <button type="button" class="chip" data-value="18">Computers</button>
-              <button type="button" class="chip" data-value="23">History</button>
-              <button type="button" class="chip" data-value="21">Sports</button>
-              <button type="button" class="chip" data-value="22">Geography</button>
-              <button type="button" class="chip" data-value="17">Science &amp; Nature</button>
-              <button type="button" class="chip" data-value="12">Music</button>
-              <button type="button" class="chip" data-value="11">Film</button>
-              <button type="button" class="chip" data-value="9">General Knowledge</button>
+              <button type="button" class="chip selected" data-value="" data-i18n="chipAny">Any</button>
+              <button type="button" class="chip" data-value="18" data-i18n="chipComputers">Computers</button>
+              <button type="button" class="chip" data-value="23" data-i18n="chipHistory">History</button>
+              <button type="button" class="chip" data-value="21" data-i18n="chipSports">Sports</button>
+              <button type="button" class="chip" data-value="22" data-i18n="chipGeography">Geography</button>
+              <button type="button" class="chip" data-value="17" data-i18n="chipScienceNature">Science &amp; Nature</button>
+              <button type="button" class="chip" data-value="12" data-i18n="chipMusic">Music</button>
+              <button type="button" class="chip" data-value="11" data-i18n="chipFilm">Film</button>
+              <button type="button" class="chip" data-value="9" data-i18n="chipGeneral">General Knowledge</button>
             </div>
           </div>
 
           <div class="field-group">
-            <span class="field-label">Difficulty</span>
+            <span class="field-label" data-i18n="labelDifficulty">Difficulty</span>
             <div class="chip-group" id="difficulty-group" data-value="">
-              <button type="button" class="chip selected" data-value="">Any</button>
-              <button type="button" class="chip" data-value="easy">Easy</button>
-              <button type="button" class="chip" data-value="medium">Medium</button>
-              <button type="button" class="chip" data-value="hard">Hard</button>
+              <button type="button" class="chip selected" data-value="" data-i18n="chipAny">Any</button>
+              <button type="button" class="chip" data-value="easy" data-i18n="chipEasy">Easy</button>
+              <button type="button" class="chip" data-value="medium" data-i18n="chipMedium">Medium</button>
+              <button type="button" class="chip" data-value="hard" data-i18n="chipHard">Hard</button>
             </div>
           </div>
 
           <div class="field-group">
-            <span class="field-label">Number of Questions</span>
+            <span class="field-label" data-i18n="labelAmount">Number of Questions</span>
             <div class="chip-group" id="amount-group" data-value="5">
               <button type="button" class="chip selected" data-value="5">5</button>
               <button type="button" class="chip" data-value="10">10</button>
@@ -64,7 +68,7 @@
             </div>
           </div>
 
-          <button id="start-btn" class="primary-btn">Start Quiz</button>
+          <button id="start-btn" class="primary-btn" data-i18n="btnStart">Start Quiz</button>
         </div>
 
         <!-- QUIZ SCREEN -->
@@ -72,8 +76,13 @@
           <div class="quiz-header">
             <h2 id="question-text">Question goes here</h2>
             <div class="quiz-info">
-              <p>Question <span id="current-question">1</span> of <span id="total-questions">5</span></p>
-              <p>Score: <span id="score">0</span></p>
+              <p>
+                <span data-i18n="quizQuestionWord">Question</span>
+                <span id="current-question">1</span>
+                <span data-i18n="quizOfWord">of</span>
+                <span id="total-questions">5</span>
+              </p>
+              <p><span data-i18n="labelScore">Score:</span> <span id="score">0</span></p>
             </div>
           </div>
 
@@ -88,19 +97,19 @@
 
         <!-- RESULT SCREEN -->
         <div id="result-screen" class="screen">
-          <span class="eyebrow">All Done</span>
-          <h1 class="headline result-headline">Results</h1>
+          <span class="eyebrow" data-i18n="eyebrowResult">All Done</span>
+          <h1 class="headline result-headline" data-i18n="headlineResults">Results</h1>
           <div class="result-info">
             <p class="result-score">
               <span id="final-score">0</span><span class="result-score-max">/ <span id="max-score">5</span></span>
             </p>
             <div id="result-message">Good job!</div>
           </div>
-          <button id="restart-btn" class="primary-btn">Restart Quiz</button>
+          <button id="restart-btn" class="primary-btn" data-i18n="btnRestart">Restart Quiz</button>
         </div>
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=5"></script>
   </body>
 </html>

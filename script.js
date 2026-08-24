@@ -19,17 +19,172 @@ const categoryGroup = document.getElementById("category-group");
 const difficultyGroup = document.getElementById("difficulty-group");
 const amountGroup = document.getElementById("amount-group");
 
-// not hardcoded anymore, gets filled from the API
+// language switcher
+const langSwitch = document.getElementById("lang-switch");
+let currentLang = "en";
+
+// ===== UI TEXT DICTIONARY (Phase 1) =====
+// every fixed piece of text on the page lives here - two languages,
+// same keys. this is separate from the quiz question translation,
+// which comes live from an API instead
+const translations = {
+  en: {
+    eyebrowStart: "Trivia Challenge",
+    headlinePrefix: "Quiz",
+    headlineHighlight: "Time",
+    subtext: "Pick your battleground, then see how much you really know.",
+    labelCategory: "Category",
+    labelDifficulty: "Difficulty",
+    labelAmount: "Number of Questions",
+    chipAny: "Any",
+    chipComputers: "Computers",
+    chipHistory: "History",
+    chipSports: "Sports",
+    chipGeography: "Geography",
+    chipScienceNature: "Science & Nature",
+    chipMusic: "Music",
+    chipFilm: "Film",
+    chipGeneral: "General Knowledge",
+    chipEasy: "Easy",
+    chipMedium: "Medium",
+    chipHard: "Hard",
+    btnStart: "Start Quiz",
+    quizQuestionWord: "Question",
+    quizOfWord: "of",
+    labelScore: "Score:",
+    eyebrowResult: "All Done",
+    headlineResults: "Results",
+    btnRestart: "Restart Quiz",
+    msgPerfect: "Perfect! You're a genius!",
+    msgGreat: "Great job! You know your stuff!",
+    msgGood: "Good effort! Keep learning!",
+    msgNotBad: "Not bad! Try again to improve!",
+    msgKeepStudying: "Keep studying! You'll get better!",
+  },
+  fa: {
+eyebrowStart: "چالش دانستنی‌ها",
+headlinePrefix: "وقتِ",
+headlineHighlight: "کوییزه!",
+subtext: "دسته‌بندی موردعلاقه‌ات رو انتخاب کن و دانسته‌هات رو به چالش بکش.",
+labelCategory: "دسته‌بندی",
+labelDifficulty: "سطح دشواری",
+labelAmount: "تعداد سؤال",
+chipAny: "همه",
+chipComputers: "کامپیوتر",
+chipHistory: "تاریخ",
+chipSports: "ورزش",
+chipGeography: "جغرافیا",
+chipScienceNature: "علم و طبیعت",
+chipMusic: "موسیقی",
+chipFilm: "فیلم و سینما",
+chipGeneral: "دانستنی‌های عمومی",
+chipEasy: "آسان",
+chipMedium: "متوسط",
+chipHard: "سخت",
+btnStart: "شروع کوییز",
+quizQuestionWord: "سؤال",
+quizOfWord: "از",
+labelScore: "امتیاز:",
+eyebrowResult: "کوییز به پایان رسید",
+headlineResults: "نتیجه",
+btnRestart: "دوباره امتحان کن",
+msgPerfect: "بی‌نقص! واقعاً فوق‌العاده بود.",
+msgGreat: "عالی بود! حسابی بلدی.",
+msgGood: "خوب بود! بازم می‌تونی بهتر عمل کنی.",
+msgNotBad: "بد نبود! یه دور دیگه امتحان کن.",
+msgKeepStudying: "یه کم بیشتر یاد بگیر و دوباره برگرد!",
+  },
+};
+
+// returns the translated string for a key, in whatever currentLang is right now
+function t(key) {
+  return translations[currentLang][key] || key;
+}
+
+// finds every element tagged with data-i18n and swaps its text
+// for the translation that matches currentLang
+function updatePageContent() {
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
+    el.textContent = t(key);
+  });
+
+  // resultMessage isn't in the HTML from the start (it's set dynamically
+  // in showResults), so data-i18n never applies to it - handle it manually
+  if (lastResultKey) {
+    resultMessage.textContent = t(lastResultKey);
+  }
+}
+
+// quizQuestions always holds the ORIGINAL English text - this is our
+// source of truth, never overwritten by translation
 let quizQuestions = [];
+
+// displayedQuestions holds whatever language is currently on screen -
+// this is what showQuestion() actually reads from and renders
+let displayedQuestions = [];
 
 // QUIZ STATE VARS
 let currentQuestionIndex = 0;
 let score = 0;
 let answersDisabled = false;
 
+// counts how many times in a row the user hit "restart" without going back
+// to the setup screen - after 3 times we send them back to reconfigure
+let restartCount = 0;
+
+// remembers which result message key was last shown, so if the user
+// switches language while still on the results screen, we can
+// re-translate it too (it's not covered by data-i18n since it's set
+// dynamically, not sitting in the HTML from the start)
+let lastResultKey = null;
+
 // event listeners
 startButton.addEventListener("click", startQuiz);
 restartButton.addEventListener("click", restartQuiz);
+
+langSwitch.addEventListener("click", async () => {
+  // flip between the two languages, no matter where on the switch you click
+  currentLang = currentLang === "en" ? "fa" : "en";
+
+  // moves the knob and highlights the active side (handled by this attribute in CSS)
+  langSwitch.dataset.active = currentLang;
+
+  // flip the page direction for Persian, flip it back for English
+  document.documentElement.dir = currentLang === "fa" ? "rtl" : "ltr";
+  document.documentElement.lang = currentLang;
+
+  // swap every data-i18n element to the new language's text
+  updatePageContent();
+
+  // remember the choice so it's still picked next time they visit
+  localStorage.setItem("preferredLang", currentLang);
+
+  // if we're in the middle of a quiz, re-translate from the ORIGINAL
+  // English questions (quizQuestions) into the newly picked language,
+  // then re-render the question that's currently on screen
+  if (quizScreen.classList.contains("active") && quizQuestions.length > 0) {
+    displayedQuestions = await translateQuestions(quizQuestions, currentLang);
+    showQuestion();
+  }
+});
+
+// on page load, check if the user already picked a language before
+// wrapped in try/catch so that if any element here is missing (e.g. an
+// out-of-date HTML file), the error doesn't stop the rest of the script
+// from running - like the translation logic further down the file
+try {
+  const savedLang = localStorage.getItem("preferredLang");
+  if (savedLang && translations[savedLang]) {
+    currentLang = savedLang;
+    document.documentElement.dir = currentLang === "fa" ? "rtl" : "ltr";
+    document.documentElement.lang = currentLang;
+    langSwitch.dataset.active = currentLang;
+  }
+  updatePageContent();
+} catch (err) {
+  console.error("Language restore failed, continuing with defaults:", err);
+}
 
 // ===== CHIP SELECTOR LOGIC =====
 // each group (category / difficulty / amount) works the same way:
@@ -69,6 +224,81 @@ function shuffleArray(array) {
   return arr;
 }
 
+// ===== TRANSLATION LOGIC =====
+// caches translated strings in localStorage so we don't re-translate the
+// same question text every time it comes up again (saves API calls + time)
+const translationCache = JSON.parse(localStorage.getItem("translationCache") || "{}");
+
+// how long we're willing to wait for a single translation before giving up
+// and just showing the English text instead - keeps the quiz from freezing
+const TRANSLATION_TIMEOUT_MS = 4000;
+
+async function translateText(text, targetLang) {
+  // nothing to translate if we're already in English
+  if (targetLang === "en") return text;
+
+  const cacheKey = `${targetLang}:${text}`;
+  if (translationCache[cacheKey]) {
+    return translationCache[cacheKey];
+  }
+
+  // AbortController lets us cancel a hanging request after a timeout,
+  // instead of leaving the user staring at "Loading..." forever
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TRANSLATION_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`,
+      { signal: controller.signal }
+    );
+    const data = await res.json();
+
+    // MyMemory doesn't fail with a normal HTTP error when the daily quota
+    // is hit - it returns status 200 but stuffs a warning into the text
+    // itself, so we have to check for that manually
+    const quotaHit =
+      data.responseStatus !== 200 ||
+      (typeof data.responseDetails === "string" && data.responseDetails.includes("QUOTA"));
+
+    if (quotaHit) {
+      throw new Error("Translation quota reached");
+    }
+
+    const translated = data.responseData.translatedText;
+
+    translationCache[cacheKey] = translated;
+    localStorage.setItem("translationCache", JSON.stringify(translationCache));
+
+    return translated;
+  } catch (err) {
+    // covers: network errors, timeout/abort, and quota errors thrown above
+    console.error("Translation unavailable, showing original English text:", err);
+    return text; // fallback: better to show English than to break the quiz
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// translates a whole batch of questions (question text + all answers)
+// runs the translations in parallel with Promise.all so it stays fast
+async function translateQuestions(questions, targetLang) {
+  if (targetLang === "en") return questions;
+
+  return Promise.all(
+    questions.map(async (q) => {
+      const translatedQuestion = await translateText(q.question, targetLang);
+      const translatedAnswers = await Promise.all(
+        q.answers.map(async (a) => ({
+          text: await translateText(a.text, targetLang),
+          correct: a.correct,
+        }))
+      );
+      return { question: translatedQuestion, answers: translatedAnswers };
+    })
+  );
+}
+
 // grab random questions from Open Trivia Database, using whatever the user picked
 async function fetchQuestions() {
   const amount = amountGroup.dataset.value;
@@ -90,6 +320,7 @@ async function fetchQuestions() {
   }
 
   // reshape the API response into the format the rest of the code expects
+  // NOTE: this always stays in English - translation happens separately
   return data.results.map((q) => {
     const answers = shuffleArray([
       { text: decodeHTML(q.correct_answer), correct: true },
@@ -109,20 +340,21 @@ async function fetchQuestions() {
 async function startQuiz() {
   // show a simple loading state on the start button
   startButton.disabled = true;
-  startButton.textContent = "Loading...";
+  startButton.textContent = currentLang === "fa" ? "در حال بارگذاری..." : "Loading...";
 
   try {
-    quizQuestions = await fetchQuestions();
+    quizQuestions = await fetchQuestions(); // always English
+    displayedQuestions = await translateQuestions(quizQuestions, currentLang); // shown language
   } catch (err) {
     console.error("Error fetching questions:", err);
     startButton.disabled = false;
-    startButton.textContent = "Start Quiz";
+    startButton.textContent = t("btnStart");
     alert("Something went wrong loading the questions. Please try again.");
     return;
   }
 
   startButton.disabled = false;
-  startButton.textContent = "Start Quiz";
+  startButton.textContent = t("btnStart");
 
   // reset vars
   currentQuestionIndex = 0;
@@ -142,7 +374,7 @@ function showQuestion() {
   // reset state
   answersDisabled = false;
 
-  const currentQuestion = quizQuestions[currentQuestionIndex];
+  const currentQuestion = displayedQuestions[currentQuestionIndex];
 
   currentQuestionSpan.textContent = currentQuestionIndex + 1;
 
@@ -211,20 +443,31 @@ function showResults() {
   const percentage = (score / quizQuestions.length) * 100;
 
   if (percentage === 100) {
-    resultMessage.textContent = "Perfect! You're a genius!";
+    lastResultKey = "msgPerfect";
   } else if (percentage >= 80) {
-    resultMessage.textContent = "Great job! You know your stuff!";
+    lastResultKey = "msgGreat";
   } else if (percentage >= 60) {
-    resultMessage.textContent = "Good effort! Keep learning!";
+    lastResultKey = "msgGood";
   } else if (percentage >= 40) {
-    resultMessage.textContent = "Not bad! Try again to improve!";
+    lastResultKey = "msgNotBad";
   } else {
-    resultMessage.textContent = "Keep studying! You'll get better!";
+    lastResultKey = "msgKeepStudying";
   }
+
+  resultMessage.textContent = t(lastResultKey);
 }
 
 function restartQuiz() {
+  restartCount++;
+
   resultScreen.classList.remove("active");
 
-  startQuiz();
+  if (restartCount >= 3) {
+    // reset the counter and send the user back to the setup screen
+    // so they can pick category/difficulty/questions again
+    restartCount = 0;
+    startScreen.classList.add("active");
+  } else {
+    startQuiz();
+  }
 }

@@ -17,6 +17,13 @@
   --font-body: "Inter", sans-serif;
 }
 
+/* when the page is in Persian, swap both fonts for Vazirmatn -
+   Space Grotesk and Inter don't have Persian glyphs at all */
+html[lang="fa"] {
+  --font-display: "Vazirmatn", sans-serif;
+  --font-body: "Vazirmatn", sans-serif;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -59,6 +66,63 @@ body {
   display: block;
 }
 
+/* LANGUAGE SWITCHER */
+.lang-switcher-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px 0;
+}
+
+.lang-switch {
+  position: relative;
+  display: inline-flex;
+  direction: ltr; /* keep this switch's own internal layout LTR no matter
+                     what the page's overall dir is set to, so the knob's
+                     left/translateX math always lines up correctly */
+  width: 84px;
+  background-color: var(--chip-bg);
+  border: none;
+  border-radius: 999px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.lang-switch-knob {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background-color: var(--primary);
+  border-radius: 999px;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lang-switch[data-active="fa"] .lang-switch-knob {
+  transform: translateX(100%);
+}
+
+.lang-switch-text {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px 0;
+  color: var(--muted);
+  transition: color 0.2s ease-out;
+}
+
+.lang-switch[data-active="en"] .lang-switch-text-en {
+  color: white;
+}
+
+.lang-switch[data-active="fa"] .lang-switch-text-fa {
+  color: white;
+}
+
 /* ===== SHARED TEXT STYLES ===== */
 .eyebrow {
   display: inline-block;
@@ -93,7 +157,7 @@ body {
 
 /* ===== SETUP FIELDS (chip selectors) ===== */
 .field-group {
-  text-align: left;
+  text-align: start;
   margin-bottom: 24px;
 }
 
@@ -202,7 +266,7 @@ body {
   padding: 14px 16px;
   font-family: var(--font-body);
   font-size: 0.98rem;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   transition: all 0.15s ease;
 }
