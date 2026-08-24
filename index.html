@@ -15,8 +15,15 @@
   <body>
     <div class="page">
       <div class="container">
-        <!-- LANGUAGE SWITCHER -->
+        <!-- LANGUAGE + THEME SWITCHERS -->
         <div class="lang-switcher-row">
+          <div class="theme-switcher" id="theme-switcher">
+            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Choose theme" aria-haspopup="true" aria-expanded="false">
+              <span class="theme-toggle-swatch" id="theme-toggle-swatch"></span>
+            </button>
+            <div class="theme-panel" id="theme-panel"></div>
+          </div>
+
           <button type="button" class="lang-switch" id="lang-switch" data-active="en" aria-label="Toggle language">
             <span class="lang-switch-knob"></span>
             <span class="lang-switch-text lang-switch-text-en">EN</span>
@@ -110,6 +117,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=9"></script>
   </body>
 </html>

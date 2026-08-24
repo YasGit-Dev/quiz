@@ -19,6 +19,99 @@ const categoryGroup = document.getElementById("category-group");
 const difficultyGroup = document.getElementById("difficulty-group");
 const amountGroup = document.getElementById("amount-group");
 
+// ===== THEME SWITCHER =====
+// each theme's "swatch" color is just its --primary value, used to
+// paint the little circle buttons so the picker previews itself
+const themes = [
+  { id: "default", name: "Midnight Navy", swatch: "#1f3a5f" },
+  { id: "olive-relic", name: "Olive Relic", swatch: "#364025" },
+  { id: "old-wine", name: "Old Wine", swatch: "#733216" },
+  { id: "snowy-days", name: "Snowy Days", swatch: "#391213" },
+  { id: "moody-earth", name: "Moody Earth", swatch: "#1e332e" },
+  { id: "future-home", name: "Future Home", swatch: "#d9a590" },
+  { id: "copper-tide", name: "Copper Tide", swatch: "#864e3f" },
+  { id: "velvet-dusk", name: "Velvet Dusk", swatch: "#9d3b50" },
+];
+
+const themeToggle = document.getElementById("theme-toggle");
+const themeToggleSwatch = document.getElementById("theme-toggle-swatch");
+const themePanel = document.getElementById("theme-panel");
+
+// build one small round swatch button per theme - done in JS instead of
+// hardcoding 8 buttons in the HTML, so adding a theme later is a
+// one-line change to the array above
+themes.forEach((theme) => {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "theme-swatch-btn";
+  btn.style.backgroundColor = theme.swatch;
+  btn.dataset.theme = theme.id;
+  btn.setAttribute("aria-label", theme.name);
+  btn.addEventListener("click", () => setTheme(theme.id));
+  themePanel.appendChild(btn);
+});
+
+function setTheme(themeId) {
+  // "default" has no [data-theme] CSS rule on purpose - it's just :root -
+  // so we remove the attribute entirely to fall back to it
+  if (themeId === "default") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", themeId);
+  }
+
+  const active = themes.find((t) => t.id === themeId) || themes[0];
+  themeToggleSwatch.style.backgroundColor = active.swatch;
+
+  themePanel.querySelectorAll(".theme-swatch-btn").forEach((b) => {
+    b.classList.toggle("selected", b.dataset.theme === themeId);
+  });
+
+  localStorage.setItem("preferredTheme", themeId);
+  closeThemePanel();
+}
+
+function openThemePanel() {
+  themePanel.classList.add("open");
+  themeToggle.setAttribute("aria-expanded", "true");
+}
+
+function closeThemePanel() {
+  themePanel.classList.remove("open");
+  themeToggle.setAttribute("aria-expanded", "false");
+}
+
+themeToggle.addEventListener("click", (event) => {
+  event.stopPropagation(); // don't let this click immediately close itself
+  if (themePanel.classList.contains("open")) {
+    closeThemePanel();
+  } else {
+    openThemePanel();
+  }
+});
+
+// clicking anywhere outside the panel closes it
+document.addEventListener("click", (event) => {
+  if (!themePanel.contains(event.target) && event.target !== themeToggle) {
+    closeThemePanel();
+  }
+});
+
+// restore saved theme on load, same defensive try/catch pattern as
+// the language restore below
+try {
+  const savedTheme = localStorage.getItem("preferredTheme");
+  if (savedTheme && themes.some((t) => t.id === savedTheme)) {
+    setTheme(savedTheme);
+  } else {
+    themePanel.querySelectorAll(".theme-swatch-btn").forEach((b) => {
+      b.classList.toggle("selected", b.dataset.theme === "default");
+    });
+  }
+} catch (err) {
+  console.error("Theme restore failed, continuing with default theme:", err);
+}
+
 // language switcher
 const langSwitch = document.getElementById("lang-switch");
 let currentLang = "en";
@@ -62,37 +155,37 @@ const translations = {
     msgKeepStudying: "Keep studying! You'll get better!",
   },
   fa: {
-eyebrowStart: "چالش دانستنی‌ها",
-headlinePrefix: "وقتِ",
-headlineHighlight: "کوییزه!",
-subtext: "دسته‌بندی موردعلاقه‌ات رو انتخاب کن و دانسته‌هات رو به چالش بکش.",
-labelCategory: "دسته‌بندی",
-labelDifficulty: "سطح دشواری",
-labelAmount: "تعداد سؤال",
-chipAny: "همه",
-chipComputers: "کامپیوتر",
-chipHistory: "تاریخ",
-chipSports: "ورزش",
-chipGeography: "جغرافیا",
-chipScienceNature: "علم و طبیعت",
-chipMusic: "موسیقی",
-chipFilm: "فیلم و سینما",
-chipGeneral: "دانستنی‌های عمومی",
-chipEasy: "آسان",
-chipMedium: "متوسط",
-chipHard: "سخت",
-btnStart: "شروع کوییز",
-quizQuestionWord: "سؤال",
-quizOfWord: "از",
-labelScore: "امتیاز:",
-eyebrowResult: "کوییز به پایان رسید",
-headlineResults: "نتیجه",
-btnRestart: "دوباره امتحان کن",
-msgPerfect: "بی‌نقص! واقعاً فوق‌العاده بود.",
-msgGreat: "عالی بود! حسابی بلدی.",
-msgGood: "خوب بود! بازم می‌تونی بهتر عمل کنی.",
-msgNotBad: "بد نبود! یه دور دیگه امتحان کن.",
-msgKeepStudying: "یه کم بیشتر یاد بگیر و دوباره برگرد!",
+    eyebrowStart: "چالش دانستنی‌ها",
+    headlinePrefix: "زمان",
+    headlineHighlight: "کوییز",
+    subtext: "میدون رو انتخاب کن، بعد ببین چقدر واقعاً بلدی.",
+    labelCategory: "دسته‌بندی",
+    labelDifficulty: "سطح سختی",
+    labelAmount: "تعداد سوالات",
+    chipAny: "همه",
+    chipComputers: "کامپیوتر",
+    chipHistory: "تاریخ",
+    chipSports: "ورزش",
+    chipGeography: "جغرافیا",
+    chipScienceNature: "علوم و طبیعت",
+    chipMusic: "موسیقی",
+    chipFilm: "فیلم",
+    chipGeneral: "عمومی",
+    chipEasy: "آسان",
+    chipMedium: "متوسط",
+    chipHard: "سخت",
+    btnStart: "شروع کوییز",
+    quizQuestionWord: "سوال",
+    quizOfWord: "از",
+    labelScore: "امتیاز:",
+    eyebrowResult: "تمام شد",
+    headlineResults: "نتایج",
+    btnRestart: "شروع دوباره",
+    msgPerfect: "عالی! نابغه‌ای!",
+    msgGreat: "آفرین! خیلی بلدی!",
+    msgGood: "خوب بود! به یادگیری ادامه بده!",
+    msgNotBad: "بد نبود! دوباره امتحان کن تا بهتر شی!",
+    msgKeepStudying: "بیشتر مطالعه کن! بهتر میشی!",
   },
 };
 

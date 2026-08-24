@@ -1,4 +1,6 @@
-/* ===== DESIGN TOKENS ===== */
+/* ===== THEME PALETTES ===== */
+
+/* Default — Midnight Navy */
 :root {
   --bg: #eef1f6;
   --surface: #ffffff;
@@ -17,8 +19,123 @@
   --font-body: "Inter", sans-serif;
 }
 
+/* Olive Relic */
+[data-theme="olive-relic"] {
+  --bg: #e6d7c4;
+  --surface: #cfbb9a;
+  --ink: #4b3d1a;
+  --muted: #899064;
+  --primary: #364025;
+  --primary-dark: #4b3d1a;
+  --success: #364025;
+  --success-bg: #899064;
+  --danger: #4b3d1a;
+  --danger-bg: #e6d7c4;
+  --border: #899064;
+  --chip-bg: #cfbb9a;
+}
+
+/* Old Wine */
+[data-theme="old-wine"] {
+  --bg: #e7d2a7;
+  --surface: #e7d2a7;
+  --ink: #432e1d;
+  --muted: #9e9268;
+  --primary: #733216;
+  --primary-dark: #432e1d;
+  --success: #84592c;
+  --success-bg: #9e9268;
+  --danger: #733216;
+  --danger-bg: #e7d2a7;
+  --border: #9e9268;
+  --chip-bg: #cfbb9a;
+}
+
+/* Snowy Days */
+[data-theme="snowy-days"] {
+  --bg: #c1bab2;
+  --surface: #c1bab2;
+  --ink: #170f0c;
+  --muted: #887d77;
+  --primary: #391213;
+  --primary-dark: #170f0c;
+  --success: #51423d;
+  --success-bg: #887d77;
+  --danger: #391213;
+  --danger-bg: #c1bab2;
+  --border: #887d77;
+  --chip-bg: #51423d;
+}
+
+/* Moody Earth */
+[data-theme="moody-earth"] {
+  --bg: #c2c2a8;
+  --surface: #c2c2a8;
+  --ink: #0a1819;
+  --muted: #778168;
+  --primary: #1e332e;
+  --primary-dark: #0a1819;
+  --success: #435441;
+  --success-bg: #778168;
+  --danger: #1e332e;
+  --danger-bg: #c2c2a8;
+  --border: #778168;
+  --chip-bg: #435441;
+}
+
+/* Future Home  */
+[data-theme="future-home"] {
+  --bg: #f0edda;
+  --surface: #e4dfb9;
+  --ink: #5f6048;
+  --muted: #9f777d;
+  --primary: #c98f7d;
+  --primary-dark: #7f8060;
+  --success: #7f8060;
+  --success-bg: #e9e5c9;
+  --danger: #a85c68;
+  --danger-bg: #f0d9d2;
+  --border: #d3cb98;
+  --chip-bg: #dfc0b4;
+}
+
+
+/* Copper Tide  */
+[data-theme="copper-tide"] {
+  --bg: #e5d5b5;
+  --surface: #c5b995;
+  --ink: #344f52;
+  --muted: #657f78;
+  --primary: #7d4b3d;
+  --primary-dark: #4c7078;
+  --success: #607a70;
+  --success-bg: #d8d0aa;
+  --danger: #a55f45;
+  --danger-bg: #e4c7a5;
+  --border: #a9a58a;
+  --chip-bg: #d49a6d;
+}
+
+/* Velvet Dusk */
+[data-theme="velvet-dusk"] {
+  --bg: #dcbbc4;
+  --surface: #dcbbc4;
+  --ink: #171723;
+  --muted: #d0a6b2;
+  --primary: #9d3b50;
+  --primary-dark: #171723;
+  --success: #9d3b50;
+  --success-bg: #d0a6b2;
+  --danger: #de7c8b;
+  --danger-bg: #dcbbc4;
+  --border: #d0a6b2;
+  --chip-bg: #de7c8b;
+}
+
 /* when the page is in Persian, swap both fonts for Vazirmatn -
-   Space Grotesk and Inter don't have Persian glyphs at all */
+   Space Grotesk and Inter don't have Persian glyphs at all.
+   this is more specific than [data-theme], so it wins regardless
+   of which color theme is active */
 html[lang="fa"] {
   --font-display: "Vazirmatn", sans-serif;
   --font-body: "Vazirmatn", sans-serif;
@@ -70,7 +187,91 @@ body {
 .lang-switcher-row {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
   padding: 16px 20px 0;
+}
+
+/* THEME SWITCHER */
+.theme-switcher {
+  position: relative;
+}
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background-color: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--primary);
+}
+
+.theme-toggle-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background-color: var(--primary);
+  display: block;
+  transition: background-color 0.2s ease;
+}
+
+.theme-panel {
+  position: absolute;
+  top: 0;
+  /* opens toward the button's own inline-start side (i.e. toward the
+     middle of the card, away from the card's edge) - inset-inline-end
+     automatically becomes "right" in LTR and "left" in RTL, so this
+     works correctly for both languages without writing separate rules */
+  inset-inline-end: calc(100% + 8px);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(16, 25, 43, 0.14);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 168px;
+  opacity: 0;
+  transform: scale(0.9);
+  transform-origin: center;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 20;
+}
+
+.theme-panel.open {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.theme-swatch-btn {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-swatch-btn:hover {
+  transform: scale(1.12);
+}
+
+.theme-swatch-btn.selected {
+  border-color: var(--ink);
 }
 
 .lang-switch {
@@ -335,6 +536,17 @@ body {
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 480px) {
+  .theme-panel {
+    width: 148px;
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .theme-swatch-btn {
+    width: 26px;
+    height: 26px;
+  }
+
   .page {
     padding: 16px 10px;
   }
